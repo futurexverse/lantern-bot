@@ -1,0 +1,20 @@
+{
+  "name": "lantern-telegram-bot",
+  "version": "1.0.0",
+  "description": "LANTERN Telegram bot — token lookup, live prices, alerts, wallet tracking and confirmed Jupiter trades on Solana.",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "node runtests.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.95.4",
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}

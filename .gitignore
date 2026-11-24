@@ -1,0 +1,5 @@
+node_modules/
+.env
+store.json
+store.test.json
+*.log
