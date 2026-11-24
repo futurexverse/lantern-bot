@@ -67,11 +67,52 @@ const routes = {
   '/alerts': cmd.alerts
 };
 
+/* ---------------- Telegram command menu ---------------- */
+// Register every command with Telegram so tapping "/" (or the bot's menu
+// button) shows them as tappable entries. Without this Telegram displays
+// no commands at all and the bot looks like "nothing works".
+const MENU = [
+  ['start', 'Start the bot / show help'],
+  ['help', 'List every command'],
+  ['price', 'Live price + 24h change'],
+  ['token', 'Full token info + safety read'],
+  ['trending', 'Trending Solana tokens'],
+  ['newpools', 'Freshly launched pools'],
+  ['linkwallet', 'Link your Phantom address (public key)'],
+  ['balance', 'SOL + holdings of your linked wallet'],
+  ['portfolio', 'Asset breakdown'],
+  ['trades', 'Your trade history'],
+  ['watch', 'Add a token to your watchlist'],
+  ['unwatch', 'Remove a token from your watchlist'],
+  ['watchlist', 'Your watchlist with live prices'],
+  ['buy', 'Open a BUY in Phantom'],
+  ['sell', 'Open a SELL in Phantom'],
+  ['alerts', 'Toggle trending/new-pool alerts']
+];
+bot.setMyCommands(MENU.map(([command, description]) => ({ command, description })))
+  .then(() => console.log('[menu] registered ' + MENU.length + ' commands'))
+  .catch(e => console.error('[menu] setMyCommands failed:', e.message));
+
+// Our own @username, so we can ignore commands meant for other bots.
+let botUsername = '';
+bot.getMe()
+  .then(me => { botUsername = (me.username || '').toLowerCase(); })
+  .catch(() => {});
+
 bot.on('message', async msg => {
   if (!msg.text || !msg.text.startsWith('/')) return;
+  const raw = msg.text.trim().split(/\s+/)[0];
+  const at = raw.indexOf('@');
+  // /help@SomeOtherBot is not ours — stay quiet.
+  if (at > 0 && botUsername && raw.slice(at + 1).toLowerCase() !== botUsername) return;
   const ctx = makeCtx(msg);
   const handler = routes[ctx.command];
-  if (!handler) return;
+  if (!handler) {
+    // Never go silent: say the command doesn't exist and where the real
+    // ones are, so every button in the menu gives feedback.
+    const shown = (ctx.command || '').slice(0, 32);
+    return ctx.reply('Unknown command: ' + shown + '\n\nTap / or send /help to see every command.');
+  }
 
   // All commands are now allowed in groups too — see commands.js GROUP_OK.
   // The reply goes to whatever chat the command was issued in. If users
